@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="/remix/remixicon.css" type="text/css" rel="stylesheet" />
+
+    <style>
+        /* Global Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #f5f5f5, #ddd);
+            color: #333;
+        }
+
+        .page-title {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 2rem;
+            color: #573b8a;
+        }
+
+        .main-form {
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+        }
+
+        .budget-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            max-width: 1340px;
+        }
+
+        /* Form Section */
+        .forms-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #573b8a;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .form-group input[type="submit"] {
+            background: #573b8a;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .form-group input[type="submit"]:hover {
+            background: #482c72;
+        }
+
+        /* Summary Section */
+        .summary-card {
+            flex: 1;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .budget-summary {
+            margin-bottom: 20px;
+        }
+
+        .summary-item {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .summary-item h4 {
+            color: #573b8a;
+        }
+
+        .expense-list {
+            margin-top: 20px;
+        }
+
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .expense-title {
+            font-weight: bold;
+            text-align: center;
+            flex: 1;
+        }
+
+        .delete-link,
+        .update-link {
+            text-decoration: none;
+        }
+
+        .delete-link i,
+        .update-link i {
+            color: #573b8a;
+            margin-right: 15px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .delete-link i:hover,
+        .update-link i:hover {
+            color: #482c72;
+        }
+
+        /* Charts Section */
+        .summary-card button {
+            margin: 5px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: #573b8a;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .summary-card button:hover {
+            background: #482c72;
+        }
+
+        canvas {
+            margin-top: 10px;
+            display: block;
+            max-width: 100%;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="w-2">
+        <div class="form-group">
+            <a href="/"> <input type="submit" name="submit" value="Logout " /></a>
+        </div>
+
+        <h1 class="page-title">Budget Page</h1>
+    </div>
+
+    <div class="main-form">
+        <div class="budget-container">
+            <!-- Left Section: Forms -->
+            <div class="forms-section">
+                <div class="form-card">
+                    <h3 class="form-title">Add Income</h3>
+                    <form method="post" action="/budget/userIncome">
+                        <div class="form-group">
+                            <label for="income">Enter Income:</label>
+                            <input type="text" id="income" name="income" placeholder="Enter Income Amount" />
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" name="submit" value="Submit Income" />
+                        </div>
+                    </form>
+                </div>
+
+                <div class="form-card">
+                    <h3 class="form-title">Add Expense</h3>
+                    <form method="post" action="/budget/userExpense">
+                        <div class="form-group">
+                            <label for="title">Enter Expense Title:</label>
+                            <input type="text" id="title" name="title" placeholder="Expense Title" />
+                        </div>
+                        <div class="form-group">
+                            <label for="price">Enter Expense Price:</label>
+                            <input type="text" id="price" name="price" placeholder="Expense Price" />
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" name="submit" value="Submit Expense" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Section: Budget Summary and Expense Details in One Card -->
+            <div class="summary-card">
+                <div class="budget-summary">
+                    <div class="summary-item" style="margin-bottom:-10px;">
+                        <h4>Total Income: <%= incomeData?incomeData.income:0 %>
+                        </h4>
+                    </div>
+                    <div class="summary-item" style="margin-bottom: -10px;">
+                        <h4>Expense Total: <%= TotalExpense %>
+                        </h4>
+                    </div>
+                    <div class="summary-item">
+                        <h4>Remaining Amount: <%= (incomeData?incomeData.income:0) - TotalExpense %>
+                        </h4>
+                    </div>
+                </div>
+                <hr>
+                <div class="expense-list">
+                    <h3>Expense Details</h3>
+                    <div class="expense-item">
+                        <div class="expense-title">No</div>
+                        <div class="expense-title">Title</div>
+                        <div class="expense-title">Price</div>
+                        <div class="expense-title">Actions</div>
+                    </div>
+                    <% expenseData.map((v, i)=> { %>
+                        <div class="expense-item">
+                            <div style="width: 25%; text-align: center;">
+                                <%= ++i %>
+                            </div>
+                            <div style="width: 25%; text-align: center;">
+                                <%= v.title %>
+                            </div>
+                            <div style="width: 25%; text-align: center;">
+                                <%= v.price %>
+                            </div>
+                            <div style="width: 25%; text-align: center;">
+                                <div style="width: 25%; text-align: center; display: flex;">
+                                    <a href="/budget/deleteData/<%= v.id %>" class="delete-link"><i
+                                            class="ri-delete-bin-6-line"></i></a>
+                                    <a href="/budget/updateData/?expId=<%= v.id %>" class="update-link"><i
+                                            class="ri-edit-box-line"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <% }) %>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <!-- FIRST CHART (EXPENSE) -->
+                <div>
+                    <button onclick="changeChartType('pie')">Pie Chart</button>
+                    <button onclick="changeChartType('bar')">Bar Chart</button>
+                    <button onclick="changeChartType('doughnut')">Doughnut Chart</button>
+                </div>
+                <div style="width:300px; height: 280px;">
+                    <canvas id="myChart"></canvas>
+                </div>
+
+                <!-- SECOND CHART (INCOME/EXPENSE) -->
+
+                <div>
+                    <button onclick="return setChartType1('pie')">pie chart</button>
+                    <button onclick="return setChartType1('bar')">bar chart</button>
+                    <button onclick="return setChartType1('doughnut')">doughnut chat</button>
+                </div>
+                <div style="width: 300px; height: 280px;">
+                    <canvas id="myChart1"></canvas>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- FIRST CHART (EXPENSE) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <script>
+
+        const ctx = document.getElementById('myChart');
+        let chart;
+
+        var LabelN = '<%- JSON.stringify(LabelNames) %>'
+        var PriceV = '<%- JSON.stringify(PriceValue) %>'
+        let chartType = 'pie';
+
+        function changeChartType(newType) {
+            chartType = newType;
+            createChart(chartType);
+        }
+
+        createChart(chartType);
+
+
+        function createChart(newType) {
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: newType,
+                data: {
+                    labels: JSON.parse(LabelN),
+                    datasets: [{
+                        label: '# of Expense',
+                        data: JSON.parse(PriceV),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+    </script>
+
+    <!-- SECOND CHART (INCOME/EXPENSE) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx1 = document.getElementById('myChart1');
+        let myChart1;
+
+        let income = '<%- JSON.stringify(incomeData?incomeData.income:0) %>';
+        let expense = '<%- JSON.stringify(TotalExpense) %>';
+
+        function setChartType1(typeD) {
+            myChart1.destroy();
+            setChart1(typeD)
+        }
+        setChart1('pie')
+        function setChart1(typeD) {
+            myChart1 = new Chart(ctx1, {
+                type: typeD,
+                data: {
+                    labels: ['income', 'expense'],
+                    datasets: [{
+                        label: '# of Income / Expense',
+                        data: [income, expense],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+    </script>
+
+
+</body>
+
+</html>
